@@ -5,12 +5,29 @@ edition = "2021"
 
 [dependencies]
 futures = "0.3.5"
+clap = { version = "4.3.11", features = ["derive"] }
 
 [dependencies.windows]
 features = [
-    "Media_Ocr",
-    "Graphics_Imaging",
-    "Storage_Streams",
     "Foundation",
+    "Win32_Foundation",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_System_Console",
+    "Win32_Graphics_Dwm",
+    "Win32_Graphics_Gdi",
+    "Win32_Graphics_Dxgi",
+    "Win32_Graphics_Dxgi_Common",
+    "Win32_Graphics_Direct3D",
+    "Win32_Graphics_Direct3D11",
+    "Win32_System_WinRT",
+    "Win32_System_WinRT_Direct3D11",
+    "Win32_System_WinRT_Graphics_Capture",
+    "UI",
+    "Storage",
+    "Storage_Streams",
+    "Graphics",
     "Graphics_Capture",
+    "Graphics_DirectX",
+    "Graphics_DirectX_Direct3D11",
+    "Graphics_Imaging",
 ]
