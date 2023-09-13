@@ -5,6 +5,7 @@ mod display_info;
 mod window_info;
 
 use cli::CaptureMode;
+use rusty_tesseract::{Args, Image};
 use windows::core::{ComInterface, IInspectable, Result, HSTRING};
 use windows::Foundation::TypedEventHandler;
 use windows::Graphics::Capture::{Direct3D11CaptureFramePool, GraphicsCaptureItem};
@@ -25,6 +26,7 @@ use windows::Win32::UI::WindowsAndMessaging::{GetDesktopWindow, GetWindowThreadP
 
 use capture::enumerate_capturable_windows;
 use display_info::enumerate_displays;
+use std::collections::HashMap;
 use std::io::Write;
 use std::sync::mpsc::channel;
 use window_info::WindowInfo;
@@ -74,6 +76,45 @@ fn main() -> Result<()> {
 
     take_screenshot(&item)?;
 
+    ocr_image()?;
+
+    Ok(())
+}
+
+fn ocr_image() -> Result<()> {
+    let img = Image::from_path("test.png").unwrap();
+
+    let mut my_args = Args {
+        lang: "chi_sim".to_string(),
+        config_variables: HashMap::from([(
+            "tessedit_char_blacklist".into(),
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".into(),
+        )]),
+        dpi: Some(50),
+        psm: Some(3),
+        oem: Some(3),
+    };
+
+    // string output
+    let output = rusty_tesseract::image_to_string(&img, &my_args).unwrap();
+    println!("The String output is: {:?}", output);
+
+    // image_to_boxes creates a BoxOutput containing the parsed output from Tesseract when using the "makebox" Parameter
+    let box_output = rusty_tesseract::image_to_boxes(&img, &my_args).unwrap();
+    println!(
+        "The first boxfile symbol is: {}",
+        box_output.boxes[0].symbol
+    );
+    println!("The full boxfile output is:\n{}", box_output.output);
+
+    // image_to_data creates a DataOutput containing the parsed output from Tesseract when using the "TSV" Parameter
+    let data_output = rusty_tesseract::image_to_data(&img, &my_args).unwrap();
+    let first_text_line = &data_output.data[4];
+    println!(
+        "The first text is '{}' with confidence {}",
+        first_text_line.text, first_text_line.conf
+    );
+    println!("The full data output is:\n{}", data_output.output);
     Ok(())
 }
 
